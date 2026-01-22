@@ -44,10 +44,14 @@ npm install
 npm i
 ```
 
+3. Set up .env file by following instructions in the 'envexample' file, Enter your key, rename the file to .env
+
 Here you list all the one-time things the developer needs to do after cloning
 your repo. Sometimes there is no need for this section, but some apps require
 some first-time configuration from the developer, for example: setting up a
 database for running your webapp locally.
+
+
 
 ## Running
 1. install npm with
