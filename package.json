@@ -1,0 +1,24 @@
+{
+  "name": "25-26_nest-planner",
+  "version": "1.0.0",
+  "description": "The purpose of Nest Planner is to  build a scheduling assistant for Elizabethtown College’s course planning process. The tool will help generate optimized course schedules for the academic year, balancing faculty availability, classroom constraints, and departmental needs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sparkle26/25-26_Nest-Planner.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sparkle26/25-26_Nest-Planner/issues"
+  },
+  "homepage": "https://github.com/Sparkle26/25-26_Nest-Planner#readme",
+  "dependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  }
+}
