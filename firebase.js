@@ -12,7 +12,6 @@ import { getAuth } from "firebase/auth";
 
 
 const FIREBASE_API_KEY = process.env.EXPO_PUBLIC_FIREBASE_API_KEY;
-console.log("KEY: "+ FIREBASE_API_KEY);
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
