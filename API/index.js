@@ -52,6 +52,13 @@ app.get('/coursetest/courses', (req, res) => {
   res.json(courseData.courses)
 })
 
+app.get('/coursetest', (req, res) => {
+  const year = req.query.year;
+  const sem =  req.query.semester;
+  const major = req.query.major;
+  res.json(courseData)
+})
+
 // app.post      <- will eventually post info to the database to reuse
 
 // app.get (/'coursetest/made, (req, res) => {            <- will eventually pull this saved info from the database
@@ -59,7 +66,7 @@ app.get('/coursetest/courses', (req, res) => {
 //})
 
 
-// app.get('/test', (req, res) => {
+// app.get('/test', (req, res) => {           <- testing .get for utility purposes
 //   res.send('Hello World!')
 // })
 
