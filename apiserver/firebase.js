@@ -5,11 +5,13 @@
  *  ./util/firebase_connection.js file. 
  * **/
 
-// using import, not require. Figure out what we are using.
+//TODO:
+// make one API folder
+// work on getAssignments stuff
 // Central Firebase initialization and helpers
 
 import{initializeApp} from 'firebase/app';
-import{getFirestore, collection, getDoc, doc} from 'firebase/firestore';
+import{getFirestore, collection, getDoc, getDocs, doc} from 'firebase/firestore';
 import{getAuth} from 'firebase/auth';
 import 'dotenv/config';
 //const {initializeApp} = require('firebase/app');
@@ -18,7 +20,7 @@ import 'dotenv/config';
 
 // we need a different way to load the env file
 const FIREBASE_API_KEY = process.env.EXPO_PUBLIC_FIREBASE_API_KEY;
-console.log(PROCESS.env.EXPO_PUBLIC_FIREBASE_API_KEY);
+console.log(FIREBASE_API_KEY);
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: FIREBASE_API_KEY,
@@ -44,6 +46,20 @@ async function getSchedules(db){
   return scheduleList;
 }
 
+async function getAssignments(db){
+  //get classes when there isn't a schedule pre-made
+  const assignmentsCol = collection(db, 'Assignments');
+  const assignmentsSnapshot = await getDocs(assignmentsCol);
+  const assignmentList = assignmentsSnapshot.docs.map(doc => doc.data());
+  console.log(assignmentList);
+  return assignmentList;
+}
+
+async function getAssignmentsByID(ID){
+  const assignmentID = ID;
+  console.log(assignmentID);
+}
+
 //year, semester, major
 async function getScheduleByID(year, semester, major){
   const docID = year + "_" + semester + "_" + major;
@@ -57,6 +73,8 @@ async function getScheduleByID(year, semester, major){
     console.log("Nothing found");
   }
 }
+
+//getAssignmentsByID(db);
 getScheduleByID(2026, "fall", "cs");
 //getSchedules(db);
 
