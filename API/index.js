@@ -1,3 +1,4 @@
+const { default: TimeTable } = require('@mikezzb/react-native-timetable')
 const express = require('express')
 const app = express()
 const port = 3000
@@ -15,6 +16,18 @@ const port = 3000
 //         }
 //     }
 // }
+
+
+app.get('/coursetest', (req, res) => {
+id        = req.query.id;
+title     = req.query.title;
+location  = req.query.location;
+day       = req.query.day;
+time      = req.query.time;
+res.json(courseData);
+})
+
+
 
 const courseData = {
 
@@ -36,28 +49,38 @@ const courseData = {
   
 }
 
-app.get('/coursetest', (req, res) => {
-  res.json(courseData);
-})
+// app.get('/coursetest', (req, res) => {
+//   res.json(courseData);
+// })
 
-app.get('/coursetest/year', (req, res) => {
-  res.json(courseData.Year)
-})
+// app.get('/coursetest/year', (req, res) => {
+//   res.json(courseData.Year)
+// })
 
-app.get('/coursetest/semester', (req, res) => {
-  res.json(courseData.Sem)
-})
+// app.get('/coursetest/semester', (req, res) => {
+//   res.json(courseData.Sem)
+// })
 
-app.get('/coursetest/courses', (req, res) => {
-  res.json(courseData.courses)
-})
+// app.get('/coursetest/courses', (req, res) => {
+//   res.json(courseData.courses)
+// })
 
-app.get('/coursetest', (req, res) => {
-  const year = req.query.year;
-  const sem =  req.query.semester;
-  const major = req.query.major;
-  res.json(courseData)
-})
+// app.get('/coursetest', (req, res) => {
+//   const year = req.query.year;
+//   const sem =  req.query.semester;
+//   const major = req.query.major;
+//   res.json(courseData)
+// })
+
+// app.get('/schedule', (req, res) => {         <- possible final version (to be updated
+//   const year = req.query.year;
+//   const sem =  req.query.semester;
+//   const major = req.query.major;
+
+//   res.json()
+// })
+
+
 
 // app.post      <- will eventually post info to the database to reuse
 
