@@ -1,5 +1,5 @@
-const { default: TimeTable } = require('@mikezzb/react-native-timetable')
-const express = require('express')
+// const { default: TimeTable } = require('@mikezzb/react-native-timetable')
+import express from 'express';
 const app = express()
 const port = 3000
 
@@ -17,37 +17,44 @@ const port = 3000
 //     }
 // }
 
+const courseData = {
+    id: 'CS1000',
+    title: 'testclass',
+    location: 'somewhere',
+    day: 'MWF',
+    time: '10:00am-12:30am'
+}
+
+
+
 
 app.get('/coursetest', (req, res) => {
-id        = req.query.id;
-title     = req.query.title;
-location  = req.query.location;
-day       = req.query.day;
-time      = req.query.time;
-res.json(courseData);
+  id        = req.query.id;
+  title     = req.query.title;
+  location  = req.query.location;
+  day       = req.query.day;
+  time      = req.query.time;
+  res.json(courseData);
 })
 
 
 
-const courseData = {
+// const courseData = {
 
-  Year: 2026,
-  Sem: "Spring",
-  Maj: "CS",
+//   Year: 2026,
+//   Sem: "Spring",
+//   Maj: "CS",
 
-  courses: [
+//   courses: [
     
-    {
-      name: 'CS1',
-      code: 'cs121',
-      day: 'MWF',
-      time: '11:00am-12:20pm',
-    }
-  ] 
-
-    
-  
-}
+//     {
+//       name: 'CS1',
+//       code: 'cs121',
+//       day: 'MWF',
+//       time: '11:00am-12:20pm',
+//     }
+//   ]  
+// }
 
 // app.get('/coursetest', (req, res) => {
 //   res.json(courseData);
