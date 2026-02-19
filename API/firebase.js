@@ -18,7 +18,7 @@ import 'dotenv/config';
 //const {getAuth} = require('firebase/auth');
 
 // we need a different way to load the env file
-const FIREBASE_API_KEY = process.env.EXPO_PUBLIC_FIREBASE_API_KEY;
+const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
 console.log(FIREBASE_API_KEY);
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -47,11 +47,15 @@ async function getSchedules(db){
 
 async function getAssignments(db){
   //get classes when there isn't a schedule pre-made
-  const assignmentsCol = collection(db, 'Assignments');
-  const assignmentsSnapshot = await getDocs(assignmentsCol);
-  const assignmentList = assignmentsSnapshot.docs.map(doc => doc.data());
-  console.log(assignmentList);
-  return assignmentList;
+  try{
+    const assignmentsCol = collection(db, 'Assignments');
+    const assignmentsSnapshot = await getDocs(assignmentsCol);
+    const assignmentList = assignmentsSnapshot.docs.map(doc => doc.data());
+    console.log("Assignments:", assignmentList);
+    return assignmentList;
+  } catch (error){
+    console.error("Error getting assignments:", error);
+  }
 }
 
 async function getAssignmentsByID(ID){
@@ -74,7 +78,7 @@ async function getScheduleByID(year, semester, major){
 }
 
 //getAssignmentsByID(db);
-getScheduleByID(2026, "fall", "cs");
+//getScheduleByID(2026, "fall", "cs");
 //getSchedules(db);
 
 export { app, db, auth, getScheduleByID };
