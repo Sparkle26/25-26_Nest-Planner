@@ -1,6 +1,9 @@
 import express from 'express';
+import { getScheduleByID } from './firebase.js';
 const app = express()
 const port = 3000
+
+
 
 app.use(express.json());
 
@@ -51,6 +54,22 @@ app.get('/coursetest', (req, res) => {
     location,
     day,
     time
+  });
+});
+
+
+app.get('/schedule', async (req, res) => {
+
+  const{year, semester, major} = req.query;
+  
+  const response = await getScheduleByID(year, semester, major);
+  console.log(response);
+
+  res.json({
+    ...response,
+    year,
+    semester,
+    major
   });
 });
 
