@@ -42,7 +42,7 @@ const courseData = [
   }
 ]
 
-7
+
 app.get('/coursetest', (req, res) => {
 
   const{id, title, location, day, time } = req.query;
