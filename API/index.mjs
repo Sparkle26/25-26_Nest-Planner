@@ -66,7 +66,7 @@ app.get('/schedule', async (req, res) => {
   console.log(response);
 
   res.json({
-    ...response,
+    courses: response,
     year,
     semester,
     major
