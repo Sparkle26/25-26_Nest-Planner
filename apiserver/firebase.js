@@ -8,6 +8,9 @@
 //TODO:
 // make one API folder
 // work on getAssignments stuff
+//move firebase.js to API folder and redownload .env to that folder
+// npm install dotenv
+
 // Central Firebase initialization and helpers
 
 import{initializeApp} from 'firebase/app';
