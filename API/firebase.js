@@ -59,7 +59,15 @@ async function getAssignments(db){
 }
 
 async function getAssignmentsByID(ID){
-  const assignmentID = ID;
+  const docID= ID;
+  const docRef = doc(db, "Assignements",docID);
+  const docSnap = await getDoc(docRef);
+  if(docSnap.exists()){
+    console.log("Document Data:", docSnap.data());
+    return docSnap.data();
+  } else {
+    console.log("Nothing found");
+  }
   console.log(assignmentID);
 }
 
@@ -81,4 +89,4 @@ async function getScheduleByID(year, semester, major){
 //getScheduleByID(2026, "fall", "cs");
 //getSchedules(db);
 
-export { app, db, auth, getScheduleByID };
+export { app, db, auth, getScheduleByID, getAssignmentsByID};
