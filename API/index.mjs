@@ -69,8 +69,18 @@ app.get('/schedule', async (req, res) => {
   const response = await getScheduleByID(year, semester, major);
   console.log(response);
 
+  let courses = [];
+  if(response){
+    for (const [key,course] of Object.entries(response)) {
+      course.id = key;
+      courses.push(course);
+    }
+  }
+
+  console.log(courses);
+
   res.json({
-    courses: response,
+    courses: courses,
     year,
     semester,
     major
