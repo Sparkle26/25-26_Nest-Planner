@@ -1,8 +1,9 @@
 const express = require('express')
+const cors = require('cors'); //gets our cors
 const app = express()
 const port = 3000
 
-
+app.use(cors());
 
 // const courseData = {
 
@@ -16,47 +17,52 @@ const port = 3000
 //     }
 // }
 
-const courseData = {
+// const courseData = {
 
+//   Year: 2026,
+//   Sem: "Spring",
+//   Maj: "CS",
+
+//   courses: [
+    
+//     {
+//       name: 'CS1',
+//       code: 'cs121',
+//       day: 'MWF',
+//       time: '11:00am-12:20pm',
+//     }
+//   ] 
+// }
+
+const courseData2 = {
+  
   Year: 2026,
   Sem: "Spring",
   Maj: "CS",
 
   courses: [
-    
-    {
-      name: 'CS1',
-      code: 'cs121',
-      day: 'MWF',
-      time: '11:00am-12:20pm',
-    }
-  ] 
+    { title: "Computer Science I",
+      id: "CS121",
+      location:"Esbenshade 281",
+      day: ["Mon", "Wed", "Fri"],
+      time: "11:00",
+    },
 
-    
-  
+    { title: "Software Engineering",
+      id: "CS341",
+      location: "CS Lounge",
+      day: ["Tue", "Thu"],
+      time: "9:30",
+    },
+  ]
 }
 
-app.get('/coursetest', (req, res) => {
-  res.json(courseData);
-})
-
-app.get('/coursetest/year', (req, res) => {
-  res.json(courseData.Year)
-})
-
-app.get('/coursetest/semester', (req, res) => {
-  res.json(courseData.Sem)
-})
-
-app.get('/coursetest/courses', (req, res) => {
-  res.json(courseData.courses)
-})
 
 app.get('/coursetest', (req, res) => {
   const year = req.query.year;
   const sem =  req.query.semester;
   const major = req.query.major;
-  res.json(courseData)
+  res.json(courseData2)
 })
 
 // app.post      <- will eventually post info to the database to reuse
