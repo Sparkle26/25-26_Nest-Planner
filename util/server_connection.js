@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL = 'http://localhost:3000/coursetest';
+const BACKEND_URL = 'http://localhost:3000/schedule';
 
 export async function getSchedule(year,semester, major) {
     console.log (year, semester, major);
