@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from "react-native";
 
-import { getSchedule } from '../util/firebase_connection';
+import { getSchedule } from "../util/server_connection";
+//import { getSchedule } from '../util/firebase_connection';
 
 // Sample data structure for the course schedule
-const classData = [
-  { title: "Computer Science I", id: "CS121", location: "Esbenshade 281", day: ["Mon", "Wed", "Fri"], time: "11:00", color: "#004B98" },
-  { title: "Software Engineering", id: "CS341", location: "CS Lounge", day: ["Tue", "Thu"], time: "9:30", color: "#3DB5E6" },
-];
+// const classData = [
+//   { title: "Computer Science I", id: "CS121", location: "Esbenshade 281", day: ["Mon", "Wed", "Fri"], time: "11:00", color: "#004B98" },
+//   { title: "Software Engineering", id: "CS341", location: "CS Lounge", day: ["Tue", "Thu"], time: "9:30", color: "#3DB5E6" },
+// ];
 
 export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" }) {
   const [selectedClass, setSelectedClass] = useState(null);
-
+  const [classData, setClassData] = useState([]);
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const timeSlots = ["8:00", "9:30", "11:00", "12:30", "2:00"];
 
   const fetchSchedule = async () => {
-    const classes = await getSchedule(year, semester, major);
-    console.log("Fetched classes:", classes);
+   // const classes = await getSchedule(year, semester, major);
+  console.log("Sending out the get request");
+  const response = await getSchedule(year, semester, major);
+  setClassData(response.courses) //make sure to follow this format when returning results 
+  console.log("Fetched classes:", classData);
+  setClassData(classData);
   };
 
   useEffect(() => {

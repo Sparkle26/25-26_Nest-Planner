@@ -1,9 +1,10 @@
 import express from 'express';
 import { getScheduleByID } from './firebase.js';
+import cors from 'cors';
 const app = express()
 const port = 3000
 
-
+app.use(cors());
 
 app.use(express.json());
 
@@ -60,13 +61,26 @@ app.get('/coursetest', (req, res) => {
 
 app.get('/schedule', async (req, res) => {
 
-  const{year, semester, major} = req.query;
-  
+  let{year, semester, major} = req.query;
+  console.log(year);
+  semester = semester.toLowerCase();
+  major = major.toLowerCase();
+
   const response = await getScheduleByID(year, semester, major);
   console.log(response);
 
+  let courses = [];
+  if(response){
+    for (const [key,course] of Object.entries(response)) {
+      course.id = key;
+      courses.push(course);
+    }
+  }
+
+  console.log(courses);
+
   res.json({
-    courses: response,
+    courses: courses,
     year,
     semester,
     major
@@ -80,4 +94,4 @@ app.listen(port, () => {
 });
 
 
-// app.use(cors());
+
