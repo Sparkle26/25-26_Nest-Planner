@@ -9,10 +9,11 @@ app.use(cors());
 app.use(express.json());
 
 class Class {
-  constructor(id, title, location, day, time){
+  constructor(id, title, location, professor, day, time){
     this.id= id;
     this.title = title;
     this.location = location;
+    this.professor = professor;
     this.day = day;
     this.time = time;
   }
