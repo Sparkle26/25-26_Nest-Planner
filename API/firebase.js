@@ -60,17 +60,29 @@ async function getAssignments(db){
 //create a new branch 
 //figure this out!!!!!!
 async function getAssignmentsByID(ID){
-  const docID= ID;
-  const docRef = doc(db, "Assignements",docID);
+  const docID = ID;
+  const docRef = doc(db, "Assignments",docID);
   const docSnap = await getDoc(docRef);
   console.log(docSnap.exists());
-  if(docSnap.exists()){
-    console.log("Document Data:", docSnap.data());
-    return docSnap.data();
+  if(!docSnap.exists()){
+    console.log("Nothing Found...");
+    return null;
   } else {
-    console.log("Nothing found");
+    console.log("Document Data:", docSnap.data());
   }
   console.log(docID);
+  const data = docSnap.data();
+  //filtering the information pulled
+  const filtered = {
+    id: ID,
+    title: data.name, 
+    location: data.location,
+    professor: data.professor,
+    day: data.courseDate,
+    time: data.time
+  };
+  console.log("Filtered: ", filtered);
+  return filtered;
 }
 
 //year, semester, major
@@ -90,6 +102,6 @@ async function getScheduleByID(year, semester, major){
 //getAssignmentsByID(db);
 //getScheduleByID(2026, "fall", "cs");
 //getSchedules(db);
+//only pull id, title, location, professor, time 
 getAssignmentsByID("CS122");
-
 export { app, db, auth, getScheduleByID};
