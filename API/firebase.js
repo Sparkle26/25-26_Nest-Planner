@@ -103,5 +103,5 @@ async function getScheduleByID(year, semester, major){
 //getScheduleByID(2026, "fall", "cs");
 //getSchedules(db);
 //only pull id, title, location, professor, time 
-getAssignmentsByID("CS122");
+getAssignmentsByID("CS121");
 export { app, db, auth, getScheduleByID};
