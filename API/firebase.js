@@ -57,18 +57,20 @@ async function getAssignments(db){
     console.error("Error getting assignments:", error);
   }
 }
-
+//create a new branch 
+//figure this out!!!!!!
 async function getAssignmentsByID(ID){
   const docID= ID;
   const docRef = doc(db, "Assignements",docID);
   const docSnap = await getDoc(docRef);
+  console.log(docSnap.exists());
   if(docSnap.exists()){
     console.log("Document Data:", docSnap.data());
     return docSnap.data();
   } else {
     console.log("Nothing found");
   }
-  console.log(assignmentID);
+  console.log(docID);
 }
 
 //year, semester, major
@@ -88,5 +90,6 @@ async function getScheduleByID(year, semester, major){
 //getAssignmentsByID(db);
 //getScheduleByID(2026, "fall", "cs");
 //getSchedules(db);
+getAssignmentsByID("CS122");
 
-export { app, db, auth, getScheduleByID, getAssignmentsByID};
+export { app, db, auth, getScheduleByID};
