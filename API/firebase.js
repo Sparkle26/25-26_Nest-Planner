@@ -99,16 +99,21 @@ async function getScheduleByID(year, semester, major){
   }
 }
 
-async function get_course_by_sem(sem){
+async function get_course_by_sem(sem, year){
+  //for even sem and odd sem. update filter to check this. 
   try{
     const assignmentsCol = collection(db, 'Assignments');
-
-    const q = query(assignmentsCol, where("Semesters", "==", sem));
+    //todo: query to get all the courses
+    const q = query(assignmentsCol);
+    //do filter by ourself
 
     const querySnapshot = await getDocs(q);
 
     const courses = querySnapshot.docs.map(doc => {
-      const data = doc.data();
+      console.log(doc.data().Semesters);
+      //TODO: make data more consistent in firestore
+      if(doc.data().Semesters.indexOf(sem) != -1){
+        const data = doc.data();
 
       return{
         id: doc.id,
@@ -117,12 +122,20 @@ async function get_course_by_sem(sem){
         professor: data.professor,
         day: data.courseDate,
         time: data.time, 
-        semester: data.semester
+        semester: data.Semesters
       
       };
+      }
+      
     });
-
+    //TODO: get rid of empty items showing up when testing
+    Object.keys(courses).forEach(key =>{
+      if(courses[key] == undefined){
+        delete courses[key];
+      }
+    })
     console.log("Courses for semester:", sem, courses);
+
     return courses; 
   } catch (error){
     console.error("Error getting courses by semester: ", error);
@@ -135,4 +148,5 @@ async function get_course_by_sem(sem){
 //only pull id, title, location, professor, time 
 //getAssignmentsByID("CS121");
 get_course_by_sem("fall");
+//TODO: get all courses
 export { app, db, auth, getScheduleByID, get_course_by_sem};
