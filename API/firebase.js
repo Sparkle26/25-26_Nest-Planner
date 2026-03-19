@@ -10,7 +10,7 @@
 // Central Firebase initialization and helpers
 
 import{initializeApp} from 'firebase/app';
-import{getFirestore, collection, getDoc, getDocs, doc} from 'firebase/firestore';
+import{getFirestore, collection, getDoc, getDocs, doc, where, query} from 'firebase/firestore';
 import{getAuth} from 'firebase/auth';
 import 'dotenv/config';
 //const {initializeApp} = require('firebase/app');
@@ -99,9 +99,40 @@ async function getScheduleByID(year, semester, major){
   }
 }
 
+async function get_course_by_sem(sem){
+  try{
+    const assignmentsCol = collection(db, 'Assignments');
+
+    const q = query(assignmentsCol, where("Semesters", "==", sem));
+
+    const querySnapshot = await getDocs(q);
+
+    const courses = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+
+      return{
+        id: doc.id,
+        title: data.name,
+        location: data.location,
+        professor: data.professor,
+        day: data.courseDate,
+        time: data.time, 
+        semester: data.semester
+      
+      };
+    });
+
+    console.log("Courses for semester:", sem, courses);
+    return courses; 
+  } catch (error){
+    console.error("Error getting courses by semester: ", error);
+    return[];
+  }
+}
 //getAssignmentsByID(db);
 //getScheduleByID(2026, "fall", "cs");
 //getSchedules(db);
 //only pull id, title, location, professor, time 
-getAssignmentsByID("CS121");
-export { app, db, auth, getScheduleByID};
+//getAssignmentsByID("CS121");
+get_course_by_sem("fall");
+export { app, db, auth, getScheduleByID, get_course_by_sem};
