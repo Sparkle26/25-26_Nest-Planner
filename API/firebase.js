@@ -102,30 +102,19 @@ async function getScheduleByID(year, semester, major){
 async function get_course_by_sem(sem, year) {
   try {
     const assignmentsCol = collection(db, 'Assignments');
-    const q = query(assignmentsCol);
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocs(assignmentsCol);
 
     const courses = querySnapshot.docs
       .map(doc => {
         const data = doc.data();
-        const semesters = data.Semesters;
+        const semester = data.Semesters; // now a string
 
-        if (!semesters) return null;
+        if (!semester) return null;
 
-        const isMatch = semesters.some(s => {
-          const semesterMatch = s.term === sem;
+        // Normalize for safety (handles "Fall", "fall", etc.)
+        const semesterMatch = semester.toLowerCase() === sem.toLowerCase();
 
-          let yearMatch = true;
-          if (s.yearType === "odd") {
-            yearMatch = year % 2 !== 0;
-          } else if (s.yearType === "even") {
-            yearMatch = year % 2 === 0;
-          }
-
-          return semesterMatch && yearMatch;
-        });
-
-        if (!isMatch) return null;
+        if (!semesterMatch) return null;
 
         return {
           id: doc.id,
@@ -134,7 +123,7 @@ async function get_course_by_sem(sem, year) {
           professor: data.professor,
           day: data.courseDate,
           time: data.time,
-          semester: data.Semesters
+          semester: semester
         };
       })
       .filter(course => course !== null);
@@ -152,6 +141,6 @@ async function get_course_by_sem(sem, year) {
 //getSchedules(db);
 //only pull id, title, location, professor, time 
 //getAssignmentsByID("CS121");
-get_course_by_sem("fall", 2025);
+get_course_by_sem("spring", 2026);
 //TODO: get all courses
 export { app, db, auth, getScheduleByID, get_course_by_sem};
