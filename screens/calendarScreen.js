@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from "react-native";
-
 import { getSchedule } from "../util/server_connection";
+
+function getRandomHexColor() {
+  const randomColor = Math.floor(Math.random() * 0xFFFFFF).toString(16);
+
+  const paddedColor = randomColor.padStart(6, '0');
+
+  return `#${paddedColor}`;
+}
 //import { getSchedule } from '../util/firebase_connection';
 
 // Sample data structure for the course schedule
@@ -13,16 +20,112 @@ import { getSchedule } from "../util/server_connection";
 export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" }) {
   const [selectedClass, setSelectedClass] = useState(null);
   const [classData, setClassData] = useState([]);
+
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const timeSlots = ["8:00", "9:30", "11:00", "12:30", "2:00"];
 
+  const normalizeTime = (timeString) => {
+    if (!timeString || typeof timeString !== "string") return "";
+    const match = timeString.match(/(\d{1,2}:\d{2})/);
+    return match ? match[1] : timeString;
+  };
+
+  const normalizeDay = (dayToken) => {
+    if (!dayToken || typeof dayToken !== "string") return null;
+    const token = dayToken.trim().toUpperCase();
+
+    const mapping = {
+      M: "Mon",
+      MON: "Mon",
+      MONDAY: "Mon",
+      TU: "Tue",
+      TUE: "Tue",
+      TUES: "Tue",
+      TUESDAY: "Tue",
+      T: "Tue",
+      W: "Wed",
+      WED: "Wed",
+      WEDNESDAY: "Wed",
+      R: "Thu",
+      TH: "Thu",
+      THU: "Thu",
+      THUR: "Thu",
+      THURS: "Thu",
+      THURSDAY: "Thu",
+      H: "Thu",
+      F: "Fri",
+      FRI: "Fri",
+      FRIDAY: "Fri",
+    };
+
+    return mapping[token] || null;
+  };
+
+  const parseDays = (dayValue) => {
+    if (Array.isArray(dayValue)) {
+      return Array.from(
+        new Set(
+          dayValue
+            .map((d) => normalizeDay(d))
+            .filter(Boolean)
+        )
+      );
+    }
+    if (typeof dayValue !== "string") return [];
+
+    // split by comma/spaces or keep single-run tokens like MWF or TuTh
+    const tokens = dayValue
+      .replace(/\s+/g, "")
+      .split(/[,;&]/)
+      .reduce((acc, token) => {
+        if (!token) return acc;
+
+        // handle compact form like MWF or TuTh
+        if (/^[A-Z]+$/.test(token) && !token.includes(" ")) {
+          let i = 0;
+          while (i < token.length) {
+            const ch = token[i];
+            if (ch === "T" && token[i + 1] === "H") {
+              acc.push("TH");
+              i += 2;
+            } else if (ch === "T" && token.startsWith("TU", i)) {
+              acc.push("TU");
+              i += 2;
+            } else {
+              acc.push(ch);
+              i += 1;
+            }
+          }
+        } else {
+          acc.push(token);
+        }
+        return acc;
+      }, []);
+
+    return Array.from(
+      new Set(
+        tokens
+          .map((t) => normalizeDay(t))
+          .filter(Boolean)
+      )
+    );
+  };
+
   const fetchSchedule = async () => {
-   // const classes = await getSchedule(year, semester, major);
-  console.log("Sending out the get request");
-  const response = await getSchedule(year, semester, major);
-  setClassData(response.courses) //make sure to follow this format when returning results 
-  console.log("Fetched classes:", classData);
-  setClassData(classData);
+    console.log("Sending out the get request");
+    const response = await getSchedule(year, semester, major);
+    const rawCourses = response?.courses || [];
+
+    const processedCourses = rawCourses.map((c) => ({
+      ...c,
+      day: parseDays(c.day),
+      time: normalizeTime(c.time),
+      color: c.color || getRandomHexColor(),
+    }));
+
+    setClassData(processedCourses);
+
+    console.log("Fetched classes:", processedCourses);
   };
 
   useEffect(() => {
@@ -109,14 +212,14 @@ export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" 
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    paddingTop: 40,
-  },
+container: {
+  flex: 1,
+  backgroundColor: "#fff",
+  paddingHorizontal: 16,
+  paddingTop: 40,
+},
 
-  /* FIXED HEADER */
+/* FIXED HEADER */
   headerWrapper: {
     width: "100%",
     alignItems: "center",
