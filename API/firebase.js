@@ -99,47 +99,52 @@ async function getScheduleByID(year, semester, major){
   }
 }
 
-async function get_course_by_sem(sem, year){
-  //for even sem and odd sem. update filter to check this. 
-  try{
+async function get_course_by_sem(sem, year) {
+  try {
     const assignmentsCol = collection(db, 'Assignments');
-    //todo: query to get all the courses
     const q = query(assignmentsCol);
-    //do filter by ourself
-
     const querySnapshot = await getDocs(q);
 
-    const courses = querySnapshot.docs.map(doc => {
-      console.log(doc.data().Semesters);
-      //TODO: make data more consistent in firestore
-      if(doc.data().Semesters.indexOf(sem) != -1){
+    const courses = querySnapshot.docs
+      .map(doc => {
         const data = doc.data();
+        const semesters = data.Semesters;
 
-      return{
-        id: doc.id,
-        title: data.name,
-        location: data.location,
-        professor: data.professor,
-        day: data.courseDate,
-        time: data.time, 
-        semester: data.Semesters
-      
-      };
-      }
-      
-    });
-    //TODO: get rid of empty items showing up when testing
-    Object.keys(courses).forEach(key =>{
-      if(courses[key] == undefined){
-        delete courses[key];
-      }
-    })
-    console.log("Courses for semester:", sem, courses);
+        if (!semesters) return null;
 
-    return courses; 
-  } catch (error){
-    console.error("Error getting courses by semester: ", error);
-    return[];
+        const isMatch = semesters.some(s => {
+          const semesterMatch = s.term === sem;
+
+          let yearMatch = true;
+          if (s.yearType === "odd") {
+            yearMatch = year % 2 !== 0;
+          } else if (s.yearType === "even") {
+            yearMatch = year % 2 === 0;
+          }
+
+          return semesterMatch && yearMatch;
+        });
+
+        if (!isMatch) return null;
+
+        return {
+          id: doc.id,
+          title: data.name,
+          location: data.location,
+          professor: data.professor,
+          day: data.courseDate,
+          time: data.time,
+          semester: data.Semesters
+        };
+      })
+      .filter(course => course !== null);
+
+    console.log("Courses for semester:", sem, year, courses);
+    return courses;
+
+  } catch (error) {
+    console.error("Error getting courses by semester:", error);
+    return [];
   }
 }
 //getAssignmentsByID(db);
@@ -147,6 +152,6 @@ async function get_course_by_sem(sem, year){
 //getSchedules(db);
 //only pull id, title, location, professor, time 
 //getAssignmentsByID("CS121");
-get_course_by_sem("fall");
+get_course_by_sem("fall", 2025);
 //TODO: get all courses
 export { app, db, auth, getScheduleByID, get_course_by_sem};
