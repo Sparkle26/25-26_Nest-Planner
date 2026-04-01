@@ -17,7 +17,7 @@ function LoginScreen({ navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
         <Image
-          source={require('../assets/nestlogo.png')}
+          source={require('../assets/ETOWN_Wordmark_2Color_PMS298andPMS2945.png')}
           style={styles.overlayImage}
           pointerEvents="none"
           resizeMode="contain"
