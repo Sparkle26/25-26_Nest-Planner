@@ -49,16 +49,20 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'flex-start',
+        alignItems: 'flex-end',
         padding: 35,
         paddingTop: 10,
     },
     logininput: {
+        width: '70%',
+        maxWidth: 240,
         height: 40,
         borderColor: 'lightgray', 
         borderWidth: 0.5, 
         marginBottom: 10, 
         paddingLeft: 10,
         color: '#000000ff',
+        alignSelf: 'flex-end',
     },
         submittext: {
         color: '#c1c3c5ff',
