@@ -4,18 +4,8 @@ import { getSchedule } from "../util/server_connection";
 
 function getRandomHexColor() {
   const randomColor = Math.floor(Math.random() * 0xFFFFFF).toString(16);
-
-  const paddedColor = randomColor.padStart(6, '0');
-
-  return `#${paddedColor}`;
+  return `#${randomColor.padStart(6, '0')}`;
 }
-//import { getSchedule } from '../util/firebase_connection';
-
-// Sample data structure for the course schedule
-// const classData = [
-//   { title: "Computer Science I", id: "CS121", location: "Esbenshade 281", day: ["Mon", "Wed", "Fri"], time: "11:00", color: "#004B98" },
-//   { title: "Software Engineering", id: "CS341", location: "CS Lounge", day: ["Tue", "Thu"], time: "9:30", color: "#3DB5E6" },
-// ];
 
 export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" }) {
   const [selectedClass, setSelectedClass] = useState(null);
@@ -32,138 +22,85 @@ export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" 
 
   const normalizeDay = (dayToken) => {
     if (!dayToken || typeof dayToken !== "string") return null;
-    const token = dayToken.trim().toUpperCase();
-
     const mapping = {
-      M: "Mon",
-      MON: "Mon",
-      MONDAY: "Mon",
-      TU: "Tue",
-      TUE: "Tue",
-      TUES: "Tue",
-      TUESDAY: "Tue",
-      T: "Tue",
-      W: "Wed",
-      WED: "Wed",
-      WEDNESDAY: "Wed",
-      R: "Thu",
-      TH: "Thu",
-      THU: "Thu",
-      THUR: "Thu",
-      THURS: "Thu",
-      THURSDAY: "Thu",
-      H: "Thu",
-      F: "Fri",
-      FRI: "Fri",
-      FRIDAY: "Fri",
+      M: "Mon", MON: "Mon", MONDAY: "Mon",
+      TU: "Tue", TUE: "Tue", TUES: "Tue", TUESDAY: "Tue", T: "Tue",
+      W: "Wed", WED: "Wed", WEDNESDAY: "Wed",
+      R: "Thu", TH: "Thu", THU: "Thu", THUR: "Thu", THURS: "Thu", THURSDAY: "Thu", H: "Thu",
+      F: "Fri", FRI: "Fri", FRIDAY: "Fri"
     };
-
-    return mapping[token] || null;
+    return mapping[dayToken.trim().toUpperCase()] || null;
   };
 
   const parseDays = (dayValue) => {
-    if (Array.isArray(dayValue)) {
-      return Array.from(
-        new Set(
-          dayValue
-            .map((d) => normalizeDay(d))
-            .filter(Boolean)
-        )
-      );
-    }
+    if (Array.isArray(dayValue)) return Array.from(new Set(dayValue.map(normalizeDay).filter(Boolean)));
     if (typeof dayValue !== "string") return [];
-
-    // split by comma/spaces or keep single-run tokens like MWF or TuTh
-    const tokens = dayValue
-      .replace(/\s+/g, "")
-      .split(/[,;&]/)
-      .reduce((acc, token) => {
-        if (!token) return acc;
-
-        // handle compact form like MWF or TuTh
-        if (/^[A-Z]+$/.test(token) && !token.includes(" ")) {
-          let i = 0;
-          while (i < token.length) {
-            const ch = token[i];
-            if (ch === "T" && token[i + 1] === "H") {
-              acc.push("TH");
-              i += 2;
-            } else if (ch === "T" && token.startsWith("TU", i)) {
-              acc.push("TU");
-              i += 2;
-            } else {
-              acc.push(ch);
-              i += 1;
-            }
-          }
-        } else {
-          acc.push(token);
+    const tokens = dayValue.replace(/\s+/g, "").split(/[,;&]/).reduce((acc, token) => {
+      if (!token) return acc;
+      if (/^[A-Z]+$/.test(token)) {
+        let i = 0;
+        while (i < token.length) {
+          const ch = token[i];
+          if (ch === "T" && token[i + 1] === "H") { acc.push("TH"); i += 2; }
+          else if (ch === "T" && token.startsWith("TU", i)) { acc.push("TU"); i += 2; }
+          else { acc.push(ch); i += 1; }
         }
-        return acc;
-      }, []);
-
-    return Array.from(
-      new Set(
-        tokens
-          .map((t) => normalizeDay(t))
-          .filter(Boolean)
-      )
-    );
+      } else acc.push(token);
+      return acc;
+    }, []);
+    return Array.from(new Set(tokens.map(normalizeDay).filter(Boolean)));
   };
 
   const fetchSchedule = async () => {
-    console.log("Sending out the get request");
     const response = await getSchedule(year, semester, major);
     const rawCourses = response?.courses || [];
-
-    const processedCourses = rawCourses.map((c) => ({
+    const processedCourses = rawCourses.map(c => ({
       ...c,
       day: parseDays(c.day),
       time: normalizeTime(c.time),
       color: c.color || getRandomHexColor(),
     }));
-
     setClassData(processedCourses);
-
-    console.log("Fetched classes:", processedCourses);
   };
 
-  useEffect(() => {
-    fetchSchedule();
-  }, [year, semester, major]);
+  useEffect(() => { fetchSchedule(); }, [year, semester, major]);
 
-  const getEvent = (day, time) =>
-    classData.find((c) => c.day.includes(day) && c.time === time);
+  const getEvent = (day, time) => classData.find(c => c.day.includes(day) && c.time === time);
 
   return (
     <View style={styles.container}>
-
-      {/* FIXED HEADER */}
+      {/* HEADER */}
       <View style={styles.headerWrapper}>
         <View style={styles.headerBubble} />
         <Text style={styles.header}>Weekly Schedule - {semester} {year}</Text>
       </View>
 
+      {/* DAY HEADER */}
       <View style={styles.tableHeader}>
         <View style={styles.timeColumnHeader} />
-        {days.map((day) => (
-          <Text key={day} style={styles.dayHeaderText}>{day}</Text>
-        ))}
+        {days.map(day => <Text key={day} style={styles.dayHeaderText}>{day}</Text>)}
       </View>
 
+      {/* SCHEDULE TABLE */}
       <ScrollView style={styles.scrollContainer}>
-        {timeSlots.map((time) => (
-          <View key={time} style={styles.row}>
-            <Text style={styles.timeText}>{time}</Text>
-
-            {days.map((day) => {
+        {timeSlots.map((time, rowIndex) => (
+          <View
+            key={time}
+            style={[
+              styles.row,
+              // { backgroundColor: time === "12:30" ? "#fefefe" : rowIndex % 2 === 0 ? "#fefefe" : "#f7f7f7" }
+            ]}
+          >
+            <View style={styles.timeColumn}>
+              <Text style={styles.timeText}>{time}</Text>
+            </View>
+            {days.map(day => {
               const event = getEvent(day, time);
-
               return (
                 <View key={day} style={styles.eventBox}>
                   {event ? (
                     <TouchableOpacity
-                      style={[styles.event, { backgroundColor: event.color || "#ccc" }]}
+                      style={[styles.event, { backgroundColor: event.color }]}
                       onPress={() => setSelectedClass(event)}
                     >
                       <Text style={styles.eventTitle}>{event.title}</Text>
@@ -180,12 +117,7 @@ export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" 
       </ScrollView>
 
       {/* MODAL */}
-      <Modal
-        visible={!!selectedClass}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSelectedClass(null)}
-      >
+      <Modal visible={!!selectedClass} transparent animationType="fade" onRequestClose={() => setSelectedClass(null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             {selectedClass && (
@@ -194,11 +126,7 @@ export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" 
                 <Text style={styles.modalText}>Course ID: {selectedClass.id}</Text>
                 <Text style={styles.modalText}>Time: {selectedClass.time}</Text>
                 <Text style={styles.modalText}>Location: {selectedClass.location}</Text>
-
-                <TouchableOpacity
-                  onPress={() => setSelectedClass(null)}
-                  style={styles.closeButton}
-                >
+                <TouchableOpacity style={styles.closeButton} onPress={() => setSelectedClass(null)}>
                   <Text style={styles.closeButtonText}>Close</Text>
                 </TouchableOpacity>
               </>
@@ -206,96 +134,113 @@ export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" 
           </View>
         </View>
       </Modal>
-
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-container: {
-  flex: 1,
-  backgroundColor: "#fff",
-  paddingHorizontal: 16,
-  paddingTop: 40,
-},
+  // CONTAINER
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 120,
+    paddingTop: 20,
+  },
 
-/* FIXED HEADER */
+  // HEADER
   headerWrapper: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
+    marginBottom: 18,
     position: "relative",
   },
   headerBubble: {
     position: "absolute",
     top: 0,
-    width: "80%",
+    width: "30%",
     height: 50,
     backgroundColor: "#c70202",
-    borderRadius: 24,
+    borderRadius: 30,
     zIndex: 1,
   },
   header: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
     color: "#fff",
     zIndex: 2,
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
 
+  // TABLE
   tableHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 5,
-    paddingRight: 8,
+    marginBottom: 4,
+    paddingHorizontal: 2,
+    marginTop: 10,
   },
   timeColumnHeader: {
     width: 50,
   },
+  timeColumn: {
+    width: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f1f5fb",
+    borderRadius: 6,
+    paddingVertical: 1,
+  },
   dayHeaderText: {
     flex: 1,
     textAlign: "center",
-    fontWeight: "bold",
-    fontSize: 16,
-    color: "#333",
+    fontWeight: "600",
+    fontSize: 15,
+    color: "#2f4f79",
+    paddingVertical: 6,
+    marginHorizontal: 70,
+    borderRadius: 5,
   },
-
   scrollContainer: {
     flex: 1,
   },
-
   row: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 5,
+    borderRadius: 8,
+    minHeight: 52,
+    overflow: "hidden",
+    paddingVertical: 9,
   },
   timeText: {
-    width: 50,
-    fontSize: 9,
-    fontWeight: "bold",
-    color: "#444",
-    paddingHorizontal: 13,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "center",
   },
 
+  // EVENT CELLS
   eventBox: {
     flex: 1,
-    height: 80,
-    marginHorizontal: 0,
-    marginVertical: 6,
-    borderRadius: 10,
-    overflow: "hidden", // FIX: ensures event fills the box cleanly
+    height: 60,
+    marginHorizontal: 6,
+    borderRadius: 8,
+    overflow: "hidden",
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    marginLeft: 12,
   },
-
   event: {
-    width: "100%", // FIXED
-    height: "100%", // FIXED
+    width: "100%",
+    height: "100%",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 4,
+    paddingVertical: 4,
   },
-
   eventTitle: {
     fontWeight: "700",
     color: "#fff",
@@ -303,51 +248,54 @@ container: {
     textAlign: "center",
   },
   eventLocation: {
-    fontSize: 10,
+    fontSize: 11,
     color: "#fff",
     textAlign: "center",
+    marginTop: 1,
   },
-
   emptySlot: {
     width: "100%",
     height: "100%",
   },
 
+  // MODAL
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalBox: {
-    width: "95%",
+    width: "20%",
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 20,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     marginBottom: 10,
     textAlign: "center",
+    color: "#222",
   },
   modalText: {
-    fontSize: 15,
-    color: "#444",
+    fontSize: 16,
+    color: "#555",
     marginBottom: 5,
     textAlign: "center",
   },
   closeButton: {
-    marginTop: 15,
+    marginTop: 18,
     alignSelf: "center",
     backgroundColor: "#c70202",
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
   closeButtonText: {
     color: "#fff",
     fontWeight: "bold",
+    fontSize: 16,
   },
 });
 

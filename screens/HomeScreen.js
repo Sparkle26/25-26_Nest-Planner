@@ -128,7 +128,7 @@ export default function HomeScreen({navigation}) {
     placeholder="Select concentration"
     listMode="SCROLLVIEW"
     style={styles.dropdown}
-    dropDownContainerStyle={[styles.dropDownContainer, { zIndex: 1000 }]}
+    dropDownContainerStyle={[styles.dropDownContainer, { zIndex: 2000 }]}
   />
 </View>
 
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: '50%',
     transform: [{ translateX: -110 }],
-    bottom: 300,
+    bottom: 160,
     zIndex: 100000,
     elevation: 20,
   },
