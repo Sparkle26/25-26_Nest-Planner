@@ -116,7 +116,7 @@ export default function HomeScreen({navigation}) {
 </View>
 
 {/* Concentration dropdown */}
-<View style={[styles.dropdownWrapper, { zIndex: 1000 }]}>
+<View style={[styles.dropdownWrapper, { zIndex: openConcentration ? 200000 : 1000 }]}>
   <DropTitle>Concentration</DropTitle>
   <DropDownPicker
     open={openConcentration}
@@ -128,7 +128,12 @@ export default function HomeScreen({navigation}) {
     placeholder="Select concentration"
     listMode="SCROLLVIEW"
     style={styles.dropdown}
-    dropDownContainerStyle={[styles.dropDownContainer, { zIndex: 2000 }]}
+    dropDownContainerStyle={[styles.dropDownContainer, { zIndex: openConcentration ? 200000 : 2000 }]}
+    onOpen={() => {
+      setOpenYear(false);
+      setOpenTerm(false);
+      setOpenMajor(false);
+    }}
   />
 </View>
 
