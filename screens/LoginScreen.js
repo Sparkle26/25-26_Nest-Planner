@@ -61,6 +61,9 @@ function LoginScreen({ navigation }) {
                 onChangeText={setPassword}
                 placeholderTextColor="rgba(10,34,64,0.5)"
                 secureTextEntry={true}
+
+                returnKeyType="done" 
+                onSubmitEditing={handleLogin} 
               />
             </View>
 
