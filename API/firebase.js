@@ -104,31 +104,45 @@ async function get_course_by_sem(sem, year) {
     const assignmentsCol = collection(db, 'Assignments');
     const querySnapshot = await getDocs(assignmentsCol);
 
+    const isEvenYear = year % 2 === 0;
+    const yearTag = isEvenYear ? "even" : "odd";
+
     const courses = querySnapshot.docs
-      .map(doc => {
-        const data = doc.data();
-        const semester = data.Semesters; // now a string
+      .map(docSnap => {
+        const data = docSnap.data();
+        const semesterStr = data.Semesters;
 
-        if (!semester) return null;
+        if (!semesterStr) return null;
 
-        // Normalize for safety (handles "Fall", "fall", etc.)
-        const semesterMatch = semester.toLowerCase() === sem.toLowerCase();
+        const normalized = semesterStr.toLowerCase();
 
-        if (!semesterMatch) return null;
+        // MUST match semester first
+        if (!normalized.includes(sem.toLowerCase())) return null;
+
+        // Check if course specifies odd/even
+        const hasOdd = normalized.includes("odd");
+        const hasEven = normalized.includes("even");
+
+        // If it's tied to a specific year, enforce match
+        if (hasOdd || hasEven) {
+          if (!normalized.includes(yearTag)) return null;
+        }
+
+        // Otherwise (no odd/even), include it (offered every year)
 
         return {
-          id: doc.id,
+          id: docSnap.id,
           title: data.name,
           location: data.location,
           professor: data.professor,
           day: data.courseDate,
           time: data.time,
-          semester: semester
+          semester: semesterStr
         };
       })
-      .filter(course => course !== null);
+      .filter(Boolean);
 
-    console.log("Courses for semester:", sem, year, courses);
+    console.log(`Courses for ${sem} ${year}:`, courses);
     return courses;
 
   } catch (error) {
@@ -141,6 +155,6 @@ async function get_course_by_sem(sem, year) {
 //getSchedules(db);
 //only pull id, title, location, professor, time 
 //getAssignmentsByID("CS121");
-get_course_by_sem("spring", 2026);
+get_course_by_sem("fall", 2025);
 //TODO: get all courses
 export { app, db, auth, getScheduleByID, get_course_by_sem};
