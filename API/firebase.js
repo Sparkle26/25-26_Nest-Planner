@@ -94,7 +94,7 @@ async function getScheduleByID(year, semester, major){
   if(docSnap.exists()){
     console.log("Document Data:", docSnap.data());
     return docSnap.data();
-  } else{
+  } else{ // if we dont have it we gonna make funcitno call to parkers side to get his function that will be called insdie the else 
     console.log("Nothing found");
   }
 }

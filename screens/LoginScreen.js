@@ -70,7 +70,7 @@ function LoginScreen({ navigation }) {
           </View>
         </View>
       </View>
-
+{/* 
       <View style={styles.navRow}>
         <Text style={styles.navText}>Home</Text>
         <Text style={styles.navText}>Cohort Calendars</Text>
@@ -78,7 +78,7 @@ function LoginScreen({ navigation }) {
         <TouchableOpacity style={styles.searchButton}>
           <Text style={styles.searchText}>Search</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 }
@@ -96,16 +96,17 @@ const styles = StyleSheet.create({
   figmaCard: {
     width: '95%',
     maxWidth: 9000,
-    height: 450,
+    height: 550,
     backgroundColor: '#E5F6FF',
     borderRadius: 22,
     padding: 20,
-    marginTop: 20,
+    marginTop: 60,
   },
   row: {
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   leftSide: {
     flex: 1,
@@ -116,33 +117,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-start',
     paddingLeft: 20,
+    
+    marginLeft: 250,  // moves the login section to the right
+    marginTop: 120,   // moves it slightly down
   },
   mainHeading: {
     color: '#004B98',
-    fontSize: 50,
+    fontSize: 150,
     fontFamily: 'Clarendon Cn BT',
     fontWeight: '700',
-    lineHeight: 55,
-    marginBottom: 5,
+    lineHeight: 100,
+    marginBottom: -30,
+    marginTop: 90,
+    marginLeft: 13,
   },
   subHeading: {
     color: '#0A2240',
     fontSize: 29,
-    fontFamily: 'Gotham-Bold',
+    fontFamily: 'Gotham',
     textTransform: 'uppercase',
-    marginBottom: 15,
+    fontWeight: '1000',
+    marginBottom: 4,
   },
   fieldGroup: {
     flexDirection: 'column',
     alignItems: 'flex-start',
     marginTop: 10,
-    width: '100%',
+    width: '70%',
   },
   fieldLabel: {
     color: '#0A2240',
     fontSize: 14,
-    fontFamily: 'Gotham-bold',
+    fontFamily: 'Gotham',
     marginBottom: 4,
+    fontWeight: '500',
   },
   inputBar: {
     width: '100%',
@@ -159,7 +167,7 @@ const styles = StyleSheet.create({
     width: '30%',
     height: 40,
     backgroundColor: '#0A2240',
-    borderRadius: 10,
+    borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -177,26 +185,26 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 10,
   },
-  navText: {
-    color: '#1E1E1E',
-    fontSize: 12,
-    fontFamily: 'Gotham',
-    textTransform: 'uppercase',
-    marginRight: 12,
-  },
+  // navText: {
+  //   color: '#1E1E1E',
+  //   fontSize: 12,
+  //   fontFamily: 'Gotham',
+  //   textTransform: 'uppercase',
+  //   marginRight: 12,
+  // },
   etownLogo: {
-    width: 200,
+    width: 150,
     height: 200,
-    alignSelf: 'flex-start',
-    marginLeft: -15,
-    marginTop: -400,
+    position: 'absolute',
+    top: -10,     // controls vertical position
+    left: 60,    // controls horizontal position
   },
   overlayImage: {
     width: 70,
     height: 80,
     position: 'absolute',
-    top: 39,
-    right: 50,
+    top: 40,
+    right: 80,
     zIndex: 10,
   },
   searchButton: {
