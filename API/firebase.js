@@ -101,6 +101,7 @@ async function getScheduleByID(year, semester, major){
 
 async function get_course_by_sem(sem, year) {
   try {
+    
     const assignmentsCol = collection(db, 'Assignments');
     const querySnapshot = await getDocs(assignmentsCol);
 

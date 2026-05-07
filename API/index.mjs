@@ -1,98 +1,56 @@
 import express from 'express';
-import { getScheduleByID } from './firebase.js';
+import { AiCourseSchedule } from "./aigen.mjs";
 import cors from 'cors';
-const app = express()
-const port = 3000
+
+const app = express();
+const port = 3000;
 
 app.use(cors());
-
 app.use(express.json());
 
-class Class {
-  constructor(id, title, location, professor, day, time){
-    this.id= id;
-    this.title = title;
-    this.location = location;
-    this.professor = professor;
-    this.day = day;
-    this.time = time;
-  }
-}
-
-const newclass = new Class("Cs250", "Title", "Out there", "tomorrow", "12 oclock")
-
-const courseData = [
-  {
-  "class1":{id: 'CS1000',
-    title: 'testclass',
-    location: 'somewhere',
-    day: 'MWF',
-    time: '10:00am-12:30am'},
-
-  "class2":{id: 'CS2000',
-    title: 'testclass2',
-    location: 'somewhere2',
-    day: 'MWF2',
-    time: '30:00am-12:30am'},
-
-
-    "classclass":{id: newclass.id,
-    title: newclass.title,
-    location: newclass.location,
-    day: newclass.day,
-    time: newclass.time}
-  }
-]
-
-
-app.get('/coursetest', (req, res) => {
-
-  const{id, title, location, day, time } = req.query;
-
-  res.json({
-    ...courseData,
-    id,
-    title,
-    location,
-    day,
-    time
-  });
-});
-
-
 app.get('/schedule', async (req, res) => {
+  try {
+    let { year, semester, major, concentration } = req.query;
 
-  let{year, semester, major} = req.query;
-  console.log(year);
-  semester = semester.toLowerCase();
-  major = major.toLowerCase();
+    console.log(`Request for schedule: ${year} ${semester} ${major}${concentration ? ` (${concentration})` : ''}`);
 
-  const response = await getScheduleByID(year, semester, major);
-  console.log(response);
-
-  let courses = [];
-  if(response){
-    for (const [key,course] of Object.entries(response)) {
-      course.id = key;
-      courses.push(course);
+    // Call aigen which handles Firebase lookup + OpenAI generation
+    const aiResult = await AiCourseSchedule(year, semester, major, concentration);
+    
+    if (!aiResult) {
+      return res.json({ courses: [] });
     }
+
+    // Parse the response
+    let parsed;
+    try {
+      parsed = JSON.parse(aiResult);
+    } catch (parseError) {
+      const jsonMatch = aiResult.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsed = JSON.parse(jsonMatch[0]);
+      } else {
+        return res.json({ courses: [] });
+      }
+    }
+
+    const courses = Array.isArray(parsed.courses) ? parsed.courses : Object.values(parsed).filter(item => item.title);
+    
+    console.log(`Returning ${courses.length} courses`);
+    
+    res.json({
+      courses,
+      year,
+      semester,
+      major,
+      concentration
+    });
+  } catch (error) {
+    console.error("Error in /schedule endpoint:", error);
+    res.status(500).json({ courses: [], error: error.message });
   }
-
-  console.log(courses);
-
-  res.json({
-    courses: courses,
-    year,
-    semester,
-    major
-  });
 });
-
-
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Server running on port ${port}`);
 });
-
-
-

@@ -142,12 +142,20 @@ export default function HomeScreen({navigation}) {
 
       {/* Generate button */}
       <View style={styles.generateWrapper} pointerEvents="box-none">
-        <Pressable onPress={() => navigation.navigate('CalendarScreen', {
-          year: valueYear,
-          term: valueTerm,
-          major: valueMajor,
-          concentration: valueConcentration,
-        })}>
+        <Pressable onPress={() => {
+          console.log("HomeScreen navigating with:", {
+            year: valueYear,
+            semester: valueTerm,
+            major: valueMajor,
+            concentration: valueConcentration,
+          });
+          navigation.navigate('CalendarScreen', {
+            year: valueYear,
+            semester: valueTerm,
+            major: valueMajor,
+            concentration: valueConcentration,
+          });
+        }}>
           <View style={styles.generate}>
             <Text style={styles.generateTitle}>GENERATE</Text>
           </View>
@@ -234,7 +242,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: '50%',
     transform: [{ translateX: -110 }],
-    bottom: 160,
+    bottom: 300,
     zIndex: 100000,
     elevation: 20,
   },

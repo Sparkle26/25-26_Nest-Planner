@@ -3,13 +3,39 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from "rea
 import { getSchedule } from "../util/server_connection";
 
 function getRandomHexColor() {
-  const randomColor = Math.floor(Math.random() * 0xFFFFFF).toString(16);
-  return `#${randomColor.padStart(6, '0')}`;
+  const randomColor = Math.floor(Math.random() * 0xffffff).toString(16);
+  return `#${randomColor.padStart(6, "0")}`;
 }
 
-export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" }) {
+function getMajorAbbrev(major) {
+  if (!major || major === 'Major') return '';
+  const abbrevs = {
+    'Computer Science': 'CS',
+    'CS': 'CS'
+  };
+  return abbrevs[major] || major;
+}
+
+function getConcentrationAbbrev(concentration) {
+  if (!concentration || concentration === 'Concentration') return '';
+  const abbrevs = {
+    'Hardware': 'Hardware',
+    'Cybersecurity': 'Cybersecurity', 
+    'Software Engineering': 'Software',
+    'Design': 'Design',
+    'AI': 'AI',
+    'Artificial Intelligence & Data Science': 'AI'
+  };
+  return abbrevs[concentration] || concentration;
+}
+
+export function CalendarScreen({ route }) {
+  const { year, semester, major, concentration } = route?.params || {};
   const [selectedClass, setSelectedClass] = useState(null);
   const [classData, setClassData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  console.log("CalendarScreen route params:", route?.params);
 
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const timeSlots = ["8:00", "9:30", "11:00", "12:30", "2:00"];
@@ -27,74 +53,106 @@ export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" 
       TU: "Tue", TUE: "Tue", TUES: "Tue", TUESDAY: "Tue", T: "Tue",
       W: "Wed", WED: "Wed", WEDNESDAY: "Wed",
       R: "Thu", TH: "Thu", THU: "Thu", THUR: "Thu", THURS: "Thu", THURSDAY: "Thu", H: "Thu",
-      F: "Fri", FRI: "Fri", FRIDAY: "Fri"
+      F: "Fri", FRI: "Fri", FRIDAY: "Fri",
     };
     return mapping[dayToken.trim().toUpperCase()] || null;
   };
 
   const parseDays = (dayValue) => {
-    if (Array.isArray(dayValue)) return Array.from(new Set(dayValue.map(normalizeDay).filter(Boolean)));
+    if (Array.isArray(dayValue)) {
+      return Array.from(new Set(dayValue.map(normalizeDay).filter(Boolean)));
+    }
+
     if (typeof dayValue !== "string") return [];
-    const tokens = dayValue.replace(/\s+/g, "").split(/[,;&]/).reduce((acc, token) => {
-      if (!token) return acc;
-      if (/^[A-Z]+$/.test(token)) {
-        let i = 0;
-        while (i < token.length) {
-          const ch = token[i];
-          if (ch === "T" && token[i + 1] === "H") { acc.push("TH"); i += 2; }
-          else if (ch === "T" && token.startsWith("TU", i)) { acc.push("TU"); i += 2; }
-          else { acc.push(ch); i += 1; }
+
+    const tokens = dayValue
+      .replace(/\s+/g, "")
+      .split(/[,;&]/)
+      .reduce((acc, token) => {
+        if (!token) return acc;
+
+        if (/^[A-Z]+$/i.test(token)) {
+          let i = 0;
+          while (i < token.length) {
+            const ch = token[i].toUpperCase();
+
+            if (ch === "T" && token[i + 1]?.toUpperCase() === "H") {
+              acc.push("TH");
+              i += 2;
+            } else if (ch === "T" && token.substring(i).toUpperCase().startsWith("TU")) {
+              acc.push("TU");
+              i += 2;
+            } else {
+              acc.push(ch);
+              i += 1;
+            }
+          }
+        } else {
+          acc.push(token);
         }
-      } else acc.push(token);
-      return acc;
-    }, []);
+
+        return acc;
+      }, []);
+
     return Array.from(new Set(tokens.map(normalizeDay).filter(Boolean)));
   };
 
   const fetchSchedule = async () => {
-    const response = await getSchedule(year, semester, major);
-    const rawCourses = response?.courses || [];
-    const processedCourses = rawCourses.map(c => ({
-      ...c,
-      day: parseDays(c.day),
-      time: normalizeTime(c.time),
-      color: c.color || getRandomHexColor(),
-    }));
-    setClassData(processedCourses);
+    setLoading(true);
+    try {
+      const response = await getSchedule(year, semester, major, concentration);
+      const rawCourses = response?.courses || [];
+
+      const processedCourses = rawCourses.map((c) => ({
+        ...c,
+        day: parseDays(c.day),
+        time: normalizeTime(c.time),
+        color: c.color || getRandomHexColor(),
+      }));
+
+      setClassData(processedCourses);
+    } catch (error) {
+      console.error("Error fetching schedule:", error);
+      setClassData([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchSchedule(); }, [year, semester, major]);
+  useEffect(() => {
+    fetchSchedule();
+  }, [year, semester, major, concentration]);
 
-  const getEvent = (day, time) => classData.find(c => c.day.includes(day) && c.time === time);
+  const getEvent = (day, time) =>
+    classData.find((c) => c.day.includes(day) && c.time === time);
 
   return (
     <View style={styles.container}>
       {/* HEADER */}
       <View style={styles.headerWrapper}>
         <View style={styles.headerBubble} />
-        <Text style={styles.header}>Weekly Schedule - {semester} {year}</Text>
+        <Text style={styles.header}>
+          Weekly Schedule{semester ? ` - ${semester}` : ''}{year ? ` ${year}` : ''}{major && major !== 'Major' ? ` ${major}` : ''}{concentration && concentration !== 'Concentration' ? ` (${concentration})` : ''}
+        </Text>
       </View>
 
       {/* DAY HEADER */}
       <View style={styles.tableHeader}>
         <View style={styles.timeColumnHeader} />
-        {days.map(day => <Text key={day} style={styles.dayHeaderText}>{day}</Text>)}
+        {days.map((day) => (
+          <Text key={day} style={styles.dayHeaderText}>{day}</Text>
+        ))}
       </View>
 
-      {/* SCHEDULE TABLE */}
+      {/* SCHEDULE GRID */}
       <ScrollView style={styles.scrollContainer}>
-        {timeSlots.map((time, rowIndex) => (
-          <View
-            key={time}
-            style={[
-              styles.row,
-              // { backgroundColor: time === "12:30" ? "#fefefe" : rowIndex % 2 === 0 ? "#fefefe" : "#f7f7f7" }
-            ]}
-          >
+        {timeSlots.map((time) => (
+          <View key={time} style={styles.row}>
             <View style={styles.timeColumn}>
               <Text style={styles.timeText}>{time}</Text>
             </View>
-            {days.map(day => {
+
+            {days.map((day) => {
               const event = getEvent(day, time);
               return (
                 <View key={day} style={styles.eventBox}>
@@ -117,16 +175,26 @@ export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" 
       </ScrollView>
 
       {/* MODAL */}
-      <Modal visible={!!selectedClass} transparent animationType="fade" onRequestClose={() => setSelectedClass(null)}>
+      <Modal
+        visible={!!selectedClass}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedClass(null)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             {selectedClass && (
               <>
                 <Text style={styles.modalTitle}>{selectedClass.title}</Text>
                 <Text style={styles.modalText}>Course ID: {selectedClass.id}</Text>
+                <Text style={styles.modalText}>Instructor: {selectedClass.instructor}</Text>
                 <Text style={styles.modalText}>Time: {selectedClass.time}</Text>
                 <Text style={styles.modalText}>Location: {selectedClass.location}</Text>
-                <TouchableOpacity style={styles.closeButton} onPress={() => setSelectedClass(null)}>
+
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setSelectedClass(null)}
+                >
                   <Text style={styles.closeButtonText}>Close</Text>
                 </TouchableOpacity>
               </>
@@ -139,7 +207,6 @@ export function CalendarScreen({ year = 2026, semester = "Spring", major = "CS" 
 }
 
 const styles = StyleSheet.create({
-  // CONTAINER
   container: {
     flex: 1,
     backgroundColor: "#ffffff",
@@ -147,7 +214,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
 
-  // HEADER
   headerWrapper: {
     width: "100%",
     alignItems: "center",
@@ -158,7 +224,7 @@ const styles = StyleSheet.create({
   headerBubble: {
     position: "absolute",
     top: 0,
-    width: "30%",
+    width: "70%",
     height: 50,
     backgroundColor: "#c70202",
     borderRadius: 30,
@@ -173,7 +239,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
 
-  // TABLE
   tableHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -202,9 +267,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 70,
     borderRadius: 5,
   },
+
   scrollContainer: {
     flex: 1,
   },
+
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -214,6 +281,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     paddingVertical: 9,
   },
+
   timeText: {
     fontSize: 15,
     fontWeight: "600",
@@ -221,7 +289,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // EVENT CELLS
   eventBox: {
     flex: 1,
     height: 60,
@@ -232,6 +299,7 @@ const styles = StyleSheet.create({
     borderColor: "#eee",
     marginLeft: 12,
   },
+
   event: {
     width: "100%",
     height: "100%",
@@ -241,36 +309,40 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 4,
   },
+
   eventTitle: {
     fontWeight: "700",
     color: "#fff",
     fontSize: 12,
     textAlign: "center",
   },
+
   eventLocation: {
     fontSize: 11,
     color: "#fff",
     textAlign: "center",
     marginTop: 1,
   },
+
   emptySlot: {
     width: "100%",
     height: "100%",
   },
 
-  // MODAL
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
+
   modalBox: {
     width: "20%",
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
   },
+
   modalTitle: {
     fontSize: 22,
     fontWeight: "bold",
@@ -278,12 +350,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#222",
   },
+
   modalText: {
     fontSize: 16,
     color: "#555",
     marginBottom: 5,
     textAlign: "center",
   },
+
   closeButton: {
     marginTop: 18,
     alignSelf: "center",
@@ -292,6 +366,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
+
   closeButtonText: {
     color: "#fff",
     fontWeight: "bold",
