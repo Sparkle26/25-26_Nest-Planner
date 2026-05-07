@@ -156,7 +156,7 @@ async function get_course_by_sem(sem, year) {
 //getSchedules(db);
 //only pull id, title, location, professor, time 
 //getAssignmentsByID("CS121");
-get_course_by_sem("spring", 2026);
+//get_course_by_sem("spring", 2026);
 //TODO: get all courses
 export { app, db, auth, getScheduleByID, get_course_by_sem};
 
